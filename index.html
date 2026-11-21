@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daman Color Analyzer</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#101827;color:white;font-family:Arial;padding:18px}
+.container{max-width:500px;margin:auto}
+h2{text-align:center;color:#38bdf8}
+.card{background:#1e293b;padding:18px;border-radius:14px;margin:15px 0}
+button{border:0;padding:13px;border-radius:9px;color:white;font-weight:bold;margin:5px;cursor:pointer}
+.red{background:#ef4444}.green{background:#16a34a}
+.violet{background:#8b5cf6}.clear{background:#64748b}
+.result{font-size:24px;text-align:center;font-weight:bold;margin:15px}
+.history{display:flex;flex-wrap:wrap;gap:7px}
+.dot{padding:9px 12px;border-radius:8px;font-weight:bold}
+small{color:#cbd5e1}
+</style>
+</head>
+<body>
+<div class="container">
+<h2>🎯 DAMAN COLOR ANALYZER</h2>
+<div class="card">
+<h3>अपना पिछला रिजल्ट डालें</h3>
+<button class="red" onclick="add('RED')">RED</button>
+<button class="green" onclick="add('GREEN')">GREEN</button>
+<button class="violet" onclick="add('VIOLET')">VIOLET</button>
+</div>
+<div class="card">
+<h3>Next Round Analysis</h3>
+<div class="result" id="prediction">रिजल्ट जोड़ें</div>
+<p id="confidence" style="text-align:center">विश्लेषण के लिए डेटा चाहिए</p>
+<small>यह केवल हिस्ट्री पर आधारित पैटर्न है, जीत की गारंटी नहीं।</small>
+</div>
+<div class="card">
+<h3>Result History</h3>
+<div class="history" id="history"></div>
+<br>
+<button class="clear" onclick="clearAll()">CLEAR HISTORY</button>
+</div>
+</div>
+<script>
+let data=JSON.parse(localStorage.getItem('damanHistory')||'[]');
+
+function add(color){
+data.unshift(color);
+if(data.length>100)data.pop();
+save();
+}
+
+function save(){
+localStorage.setItem('damanHistory',JSON.stringify(data));
+render();
+}
+
+function render(){
+document.getElementById('history').innerHTML=data.map(c=>
+`<span class="dot" style="background:${c==='RED'?'#ef4444':c==='GREEN'?'#16a34a':'#8b5cf6'}">${c}</span>`
+).join('');
+
+if(data.length<5){
+document.getElementById('prediction').innerText='और रिजल्ट जोड़ें';
+document.getElementById('confidence').innerText='कम से कम 5 रिजल्ट जरूरी हैं';
+return;
+}
+
+let counts={RED:0,GREEN:0,VIOLET:0};
+data.slice(0,20).forEach(c=>counts[c]++);
+let sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+document.getElementById('prediction').innerText=sorted[0][0];
+document.getElementById('confidence').innerText=
+'पिछले '+Math.min(data.length,20)+' रिजल्ट में सबसे ज्यादा: '+sorted[0][1];
+}
+
+function clearAll(){
+if(confirm('सभी हिस्ट्री हटाएँ?')){
+data=[];
+save();
+}
+}
+render();
+</script>
+</body>
+  </html>
+
